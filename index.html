@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Garage</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1220;color:#f1f5f9;font-family:Arial,sans-serif}
+header{text-align:center;padding:30px 15px}
+h1{font-size:38px;margin:5px;color:#4ade80}
+p{color:#bdc8d8;line-height:1.6}
+main{max-width:850px;margin:auto;padding:12px}
+.card{background:#111c2e;border:1px solid #2b3b52;border-radius:15px;padding:16px;margin-bottom:18px}
+.stats{display:flex;gap:8px;margin-top:20px}
+.stat{flex:1;background:#172438;padding:10px 4px;border-radius:9px;font-size:12px}
+.stat b{display:block;font-size:16px;color:#4ade80;margin-bottom:5px}
+.board{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin:15px 0}
+.pixel{aspect-ratio:1;background:#29384c;border:0;border-radius:2px;padding:0}
+.pixel.selected{background:#4ade80}
+.pixel.sold{background:#d9a441}
+button,.btn{background:#4ade80;color:#082013;border:0;border-radius:9px;padding:12px;font-weight:bold;cursor:pointer}
+.secondary{background:#334155;color:white}
+input,textarea{width:100%;padding:12px;margin:6px 0 12px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:white}
+label{font-size:14px;color:#cbd5e1}
+.small{font-size:12px;color:#9eacc0}
+footer{text-align:center;padding:20px;color:#9eacc0;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<p>IKLAN DIGITAL • DUKUNG BISNIS LOKAL</p>
+<h1>PIXEL GARAGE</h1>
+<p>Satu juta piksel. Satu tempat untuk logo, karya, dan bisnis kamu.</p>
+<div class="stats">
+<div class="stat"><b>1000 × 1000</b>Ukuran kanvas</div>
+<div class="stat"><b>10.000</b>Slot tersedia</div>
+<div class="stat"><b>Rp2.000</b>Harga contoh/slot</div>
+</div>
+</header>
+
+<main>
+<section class="card">
+<h2>Pilih slot iklan</h2>
+<p class="small">Ketuk kotak untuk memilih slot. Hijau berarti dipilih, kuning berarti terjual.</p>
+<div class="board" id="board"></div>
+<p id="total">Slot dipilih: 0 | Total: Rp0</p>
+<button class="secondary" onclick="clearSlots()">Hapus pilihan</button>
+</section>
+
+<section class="card">
+<h2>Pesan ruang iklan</h2>
+<p>Sudah memilih slot? Isi informasi di bawah, lalu kirim permintaan pemesanan.</p>
+<label>Nama atau nama bisnis</label>
+<input id="name" placeholder="Nama bisnis kamu">
+<label>Link website atau media sosial</label>
+<input id="link" placeholder="https://...">
+<label>Catatan tambahan</label>
+<textarea id="note" rows="3" placeholder="Jelaskan logo atau iklan yang ingin dipasang"></textarea>
+<button onclick="order()">Buat pesan pesanan</button>
+<p class="small">Pemesanan belum otomatis dibayar. Pengelola harus mengonfirmasi ketersediaan slot.</p>
+</section>
+
+<section class="card">
+<h2>Bagaimana cara kerjanya?</h2>
+<p>1. Pilih slot iklan.</p>
+<p>2. Isi nama bisnis dan tautan.</p>
+<p>3. Kirim permintaan kepada pengelola.</p>
+<p>4. Pengelola mengonfirmasi harga, pembayaran, dan pemasangan logo.</p>
+</section>
+</main>
+
+<footer>PIXEL GARAGE © 2026<br>Ruang iklan untuk bisnis dan kreator lokal.</footer>
+
+<script>
+const PRICE=2000;
+const WHATSAPP="6282160442090";
+const selected=new Set();
+const sold=new Set();
+const board=document.getElementById("board");
+
+for(let i=0;i<10000;i++){
+  const b=document.createElement("button");
+  b.className="pixel";
+  b.type="button";
+  b.title="Slot "+(i+1);
+  if(sold.has(i)){
+    b.classList.add("sold");
+    b.disabled=true;
+  }
+  b.onclick=()=>{
+    if(selected.has(i)){
+      selected.delete(i);
+      b.classList.remove("selected");
+    }else{
+      selected.add(i);
+      b.classList.add("selected");
+    }
+    updateTotal();
+  };
+  board.appendChild(b);
+}
+
+function updateTotal(){
+  document.getElementById("total").textContent=
+  "Slot dipilih: "+selected.size+
+  " | Total: Rp"+(selected.size*PRICE).toLocaleString("id-ID");
+}
+
+function clearSlots(){
+  selected.clear();
+  document.querySelectorAll(".pixel.selected").forEach(
+    b=>b.classList.remove("selected")
+  );
+  updateTotal();
+}
+
+function order(){
+  if(selected.size===0){
+    alert("Pilih slot terlebih dahulu.");
+    return;
+  }
+  if(WHATSAPP.includes("X")){
+    alert("Nomor WhatsApp pengelola belum diatur.");
+    return;
+  }
+  const name=document.getElementById("name").value.trim();
+  const link=document.getElementById("link").value.trim();
+  const note=document.getElementById("note").value.trim();
+  if(!name){
+    alert("Isi nama atau nama bisnis.");
+    return;
+  }
+  const message=
+    "Halo, saya ingin memesan slot Pixel Garage.%0A"+
+    "Nama: "+encodeURIComponent(name)+"%0A"+
+    "Jumlah slot: "+selected.size+"%0A"+
+    "Perkiraan harga: Rp"+(selected.size*PRICE).toLocaleString("id-ID")+"%0A"+
+    "Tautan: "+encodeURIComponent(link||"-")+"%0A"+
+    "Catatan: "+encodeURIComponent(note||"-");
+  window.open("https://wa.me/"+WHATSAPP+"?text="+message,"_blank");
+}
+</script>
+</body>
+                         </html>
+                         
